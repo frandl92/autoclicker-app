@@ -1,13 +1,14 @@
 import { LitElement, html, css } from "lit";
-import { installRouter } from "pwa-helpers/router";
+import { installRouter } from "pwa-helpers/router.js";
 
 import "./pages/gameclicker-page";
 import "./pages/loginclicker-page";
+import "./pages/rankingclicker-page"
 
 export class AutoclickerApp extends LitElement {
   static get properties() {
     return {
-      view: { type: String },
+      page: { type: String },
       currentUser: { type: Object },
     };
   }
@@ -18,7 +19,7 @@ export class AutoclickerApp extends LitElement {
 
   constructor() {
     super();
-    this.view = "home";
+    this.page = 'home';
     this.currentUser = {};
 
     installRouter((location) => {
@@ -27,12 +28,10 @@ export class AutoclickerApp extends LitElement {
   }
 
   logInEvent(event) {
-    console.log(event.detail);
     this.goToPage(event.detail);
   }
 
   goToPage(detail) {
-    console.log(detail);
     window.history.pushState({}, "", detail.view);
     this.handleNavigation(window.location);
     this.currentUser = detail.currentuser;
@@ -40,34 +39,37 @@ export class AutoclickerApp extends LitElement {
   }
 
   handleNavigation(location) {
-    console.log(location);
     const path = location.pathname;
-    console.log(path.slice(1));
-    this.view = path === "/" ? "home" : path.slice(1);
+    this.page = path === "/" ? "home" : path.slice(1);
   }
 
   handlerPages() {
-    switch (this.view) {
-      case "home": {
+    switch (this.page) {
+      case "home": 
         return html`<loginclicker-page
           @handle-navigator=${this.logInEvent}
+          @goTo-ranking=${this.logInEvent}
         ></loginclicker-page>`;
-      }
-      case "game": {
+      
+      case "game": 
         return html`<gameclicker-page
           .currentUser=${this.currentUser}
-        ></gameclicker-page>`;
-      }
-      default: {
-        this.goToPage({ view: "home", currentUser: {} });
-        return html`<loginclicker-page
-          @handle-navigator=${this.logInEvent}
-        ></loginclicker-page>`;
-      }
+       @game-navigator=${this.logInEvent} ></gameclicker-page>`;
+
+      case "ranking":
+        return html `<rankingclicker-page></rankingclicker-page>`
+    
+      default:  
+      window.history.pushState({}, "", "/");
+      return html `<loginclicker-page
+      @handle-navigator=${this.logInEvent}
+      @goTo-ranking=${this.logInEvent}
+    ></loginclicker-page>`
     }
   }
 
   render() {
-    return html` <div>${this.handlerPages()}</div> `;
+    return html`
+     ${this.handlerPages()} `;
   }
 }

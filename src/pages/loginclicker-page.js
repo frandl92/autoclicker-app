@@ -60,6 +60,7 @@ export class LoginPage extends LitElement {
 
   constructor() {
     super();
+    
   }
 
   _onLogin(event) {
@@ -67,15 +68,21 @@ export class LoginPage extends LitElement {
     const user = this.shadowRoot.querySelector("input");
     if (user.value === "") {
       alert("Please insert a User Name");
-    } else if (!localStorage.getItem(user.value)) {
+    } else if (!localStorage.getItem("user" + user.value)) {
       let newUser = {
         name: user.value,
         clicks: 0,
-        clickerbasecost: 1,
+        baseCost: 1,
+        clickerCost: 50
       };
       localStorage.setItem("user" + user.value, JSON.stringify(newUser));
       this._goTo("game", newUser);
     }
+    else {
+      const userLog = JSON.parse(localStorage.getItem("user" + user.value));
+      this._goTo("game", userLog)
+    }
+    
   }
 
   _goTo(page, newUser) {
@@ -86,6 +93,10 @@ export class LoginPage extends LitElement {
     );
   }
 
+  _goToRanking(){
+    this.dispatchEvent(new CustomEvent('goTo-ranking', {detail: {view: "ranking", currentuser:{}}}))
+  }
+
   render() {
     return html`
         <div class="container">
@@ -94,6 +105,7 @@ export class LoginPage extends LitElement {
            <input name= "user" class="input-user" placeholder="Enter your User"></input>
            <button type = "submit" class="btn-submit">LET´S GO</button>
          </form>
+         <p @click=${this._goToRanking}>SEE RANKING</p>
        </div>
        
         `;
